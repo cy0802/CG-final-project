@@ -58,12 +58,12 @@ std::vector<float> ObjReader::read(char* path) {
 				objFile >> tmp;
 				// std::cout << tmp << " ";
 				ss.clear(); ss << tmp;
-				ss >> vertexIdx[i] >> ch1 >> textureIdx[i] >> ch2 >> normalIdx[i];
+				ss >> vertexIdx[i] >> ch1 >> textureIdx[i]; // >> ch2 >> normalIdx[i];
 				// std::cout << vertexIdx[i] << " " << textureIdx[i] << std::endl;
 			}
 			// std::cout << vertexIdx[0] << " " << vertexIdx[1] << " " << vertexIdx[2] << '\n';
 			// std::cout << textureIdx[0] << ' ' << textureIdx[1] << " " << textureIdx[2] << '\n';
-			// glm::vec3 normal = glm::cross(vertex[vertexIdx[0]] - vertex[vertexIdx[1]], vertex[vertexIdx[0]] - vertex[vertexIdx[2]]);
+			glm::vec3 normal = glm::cross(vertex[vertexIdx[0]] - vertex[vertexIdx[1]], vertex[vertexIdx[0]] - vertex[vertexIdx[2]]);
 			// std::cout << "vertex number: " << vertex.size() << " / ";
 			// std::cout << "normal number: " << normal.size() << " / ";
 			// std::cout << "texture coord number: " << texture.size() << " / ";
@@ -72,9 +72,12 @@ std::vector<float> ObjReader::read(char* path) {
 				allData.push_back(vertex[vertexIdx[i]].x);
 				allData.push_back(vertex[vertexIdx[i]].y);
 				allData.push_back(vertex[vertexIdx[i]].z);
-				allData.push_back(normal[normalIdx[i]].x);
+				allData.push_back(normal.x);
+				allData.push_back(normal.y);
+				allData.push_back(normal.z);
+				/*allData.push_back(normal[normalIdx[i]].x);
 				allData.push_back(normal[normalIdx[i]].y);
-				allData.push_back(normal[normalIdx[i]].z);
+				allData.push_back(normal[normalIdx[i]].z);*/
 				allData.push_back(texture[textureIdx[i]].x);
 				allData.push_back(texture[textureIdx[i]].y);
 			}

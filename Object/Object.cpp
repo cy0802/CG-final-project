@@ -15,7 +15,8 @@ void Object::init(char* objfile, char* mtlfile, char* textureImg) {
     if (*(v.end() - 3) > _scale) _scale = *(v.end() - 3);
     // this->scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.0 / _scale, 1.0 / _scale, 1.0 / _scale));
     // std::cout << "scale: " << 100.0 / _scale << "\n";
-    this->scale = glm::scale(glm::mat4(1.0f), glm::vec3(2.0 / _scale, 2.0 / _scale, 2.0 / _scale));
+    this->scalingFactor = glm::vec3(1.0 / _scale, 1.0 / _scale, 1.0 / _scale);
+    this->scale = glm::scale(glm::mat4(1.0f), this->scalingFactor);
     v.pop_back(); v.pop_back(); v.pop_back();
     this->sizeofData = v.size() / 8;
     std::copy(v.begin(), v.end(), this->data);
@@ -59,6 +60,16 @@ void Object::readMtl(char* mtlPath) {
         }
     }
 }
+
+void Object::adjust(glm::vec3 rotateAngle, glm::vec3 _scalingFactor, glm::vec3 translation) {
+    rotate(rotateAngle.x, 'x');
+    rotate(rotateAngle.y, 'y');
+    rotate(rotateAngle.z, 'z');
+    this->scale = glm::scale(this->scale, _scalingFactor);
+    this->scalingFactor = this->scalingFactor * _scalingFactor;
+    this->translation = glm::translate(glm::mat4(1.0f), translation);
+}
+
 void Object::setup(Light light, glm::vec3 camera) {
     this->shader.use();
     this->shader.setInt((char*)"texture_", 0);
@@ -108,10 +119,18 @@ unsigned int Object::loadTexture() {
 void Object::rotate(float angle, char axis) {
 	if (axis == 'x') {
 		rotationX = rotationX * glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(1.0f, 0.0f, 0.0f));
+        rotateAngle.x += angle;
 	} else if (axis == 'y') {
 		rotationY = rotationY * glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
+        rotateAngle.y += angle;
 	} else {
 		rotationZ = rotationZ * glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
+        rotateAngle.z += angle;
 	}
 	rotation = rotationX * rotationY * rotationZ;
+}
+void Object::zoomin(float _scale) {
+    float rate = (scalingFactor.x + _scale) / scalingFactor.x;
+    scalingFactor = glm::vec3(scalingFactor.x + _scale, rate * scalingFactor.y, rate * scalingFactor.z);
+    this->scale = glm::scale(glm::mat4(1.0f), this->scalingFactor);
 }

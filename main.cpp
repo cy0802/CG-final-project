@@ -8,9 +8,9 @@
 
 Light light0(glm::vec3(1.0f, -1.0f, 1.0f));
 glm::vec3 camera = glm::vec3(1.0, -0.0, 0.0);
-Object landscape((char*)"..\\resource\\landscape.obj", (char*)"..\\resource\\landscape\\landscpae.mtl", (char*)"..\\resource\\landscape.png");
+Object landscape((char*)"..\\resource\\landscape.obj", (char*)"..\\resource\\landscape\\landscpae.mtl", (char*)"..\\resource\\landscape.jpg");
 const unsigned int SCR_WIDTH = 1300;
-const unsigned int SCR_HEIGHT = 1300;
+const unsigned int SCR_HEIGHT = 1100;
 GLFWwindow* window;
 unsigned int VAO, VBO;
 unsigned int texture;
@@ -38,20 +38,22 @@ int main() {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(GL_FLOAT)));
     glEnableVertexAttribArray(2);
+
     landscape.setup(light0, camera);
-    landscape.rotate(180.0, 'x');
+    landscape.adjust(glm::vec3(174.0, 73.0, 0.0), glm::vec3(10.0, 10.0, 8.0), glm::vec3(0.4f, 1.0f, 0.0f));
+    // landscape.rotate(174.0, 'x');
+    // landscape.rotate(73.0, 'y');
     texture = landscape.loadTexture();
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
         glClearColor(0.8, 0.8, 0.8, 0.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-        glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        // glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.4f, 1.0f, 0.0f));
         glm::vec3 viewpos = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
         // glm::mat4 view = glm::lookAt(camera, viewpos, up);
-        landscape.shader.setMat4((char*)"view", translate);
+        landscape.shader.setMat4((char*)"view", landscape.translation);
         // landscape.shader.setMat4((char*)"view", view * translate);
         // landscape.shader.setVec3((char*)"viewPos", camera);
         landscape.shader.setMat4((char*)"local", landscape.rotation * landscape.scale);
@@ -125,6 +127,14 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         if (key == GLFW_KEY_DOWN) {
             landscape.rotate(-1.0, 'x');
         }
+        if (key == GLFW_KEY_1) {
+            landscape.zoomin(0.2);
+        }
+        if (key == GLFW_KEY_2) {
+            landscape.zoomin(-0.2);
+        }
+        std::cout << "current rotate angle: " << landscape.rotateAngle.x << " "
+            << landscape.rotateAngle.y << " " << landscape.rotateAngle.z << "\n";
     }
 }
 
