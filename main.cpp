@@ -5,6 +5,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Object/Object.h"
 #include "Light/Light.h"
+#include "Background/Background.h"
+#include "../Includes/stb_image.h"
+#define STB_IMAGE_IMPLEMENTATION
 
 Light light0(glm::vec3(1.0f, -1.0f, 1.0f));
 glm::vec3 camera = glm::vec3(1.0, -0.0, 0.0);
@@ -12,8 +15,8 @@ Object landscape((char*)"..\\resource\\landscape.obj", (char*)"..\\resource\\lan
 const unsigned int SCR_WIDTH = 1300;
 const unsigned int SCR_HEIGHT = 1100;
 GLFWwindow* window;
-unsigned int VAO, VBO;
-unsigned int texture;
+// unsigned int VAO, VBO;
+// unsigned int texture;
 
 void init();
 void processInput(GLFWwindow* window);
@@ -24,32 +27,19 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 int main() {
     init();
+    Background background((char*)"..\\resource\\sky.jpg");
     landscape.shader = Shader((char*)"..\\resource\\landscape.vert", (char*)"..\\resource\\landscape.frag");
-
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(landscape.data), landscape.data, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(GL_FLOAT)));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(GL_FLOAT)));
-    glEnableVertexAttribArray(2);
-
+    // std::cout << "Landscape Shader ID: " << landscape.shader.id << "\n";
+    // std::cout << "Background Shader ID: " << background.shader.id << "\n";
     landscape.setup(light0, camera);
     landscape.adjust(glm::vec3(174.0, 73.0, 0.0), glm::vec3(10.0, 10.0, 8.0), glm::vec3(0.4f, 1.0f, 0.0f));
-    // landscape.rotate(174.0, 'x');
-    // landscape.rotate(73.0, 'y');
-    texture = landscape.loadTexture();
+    landscape.loadTexture();
+
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
         glClearColor(0.8, 0.8, 0.8, 0.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.4f, 1.0f, 0.0f));
         glm::vec3 viewpos = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
         // glm::mat4 view = glm::lookAt(camera, viewpos, up);
@@ -57,11 +47,15 @@ int main() {
         // landscape.shader.setMat4((char*)"view", view * translate);
         // landscape.shader.setVec3((char*)"viewPos", camera);
         landscape.shader.setMat4((char*)"local", landscape.rotation * landscape.scale);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, landscape.sizeofData);
+        
+        //// glBindVertexArray(VAO);
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, texture);
+        //glDrawArrays(GL_TRIANGLES, 0, landscape.sizeofData);
+        
+        background.draw();
+        landscape.draw();
+        
         GLenum error = glGetError();
         if (error != GL_NO_ERROR) {
             std::cout << "OpenGL Error: " << error << std::endl;
@@ -70,8 +64,8 @@ int main() {
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &landscape.VAO);
+    glDeleteBuffers(1, &landscape.VBO);
 
 	return 0;
 }

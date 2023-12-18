@@ -70,7 +70,29 @@ void Object::adjust(glm::vec3 rotateAngle, glm::vec3 _scalingFactor, glm::vec3 t
     this->translation = glm::translate(glm::mat4(1.0f), translation);
 }
 
+void Object::draw() {
+    glBindVertexArray(VAO);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    this->shader.use();
+    this->shader.setInt((char*)"texture_", 0);
+    glDrawArrays(GL_TRIANGLES, 0, sizeofData);
+}
+
 void Object::setup(Light light, glm::vec3 camera) {
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(this->data), this->data, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(GL_FLOAT)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(GL_FLOAT)));
+    glEnableVertexAttribArray(2);
+
     this->shader.use();
     this->shader.setInt((char*)"texture_", 0);
     this->shader.setMat4((char*)"projection", this->projection);
@@ -88,7 +110,7 @@ void Object::setup(Light light, glm::vec3 camera) {
     // this->shader.setVec3((char*)"material.diffuse", this->diffuse);
     // this->shader.setVec3((char*)"material.specular", this->specular);
 }
-unsigned int Object::loadTexture() {
+void Object::loadTexture() {
     glGenTextures(1, &this->texture);
     glBindTexture(GL_TEXTURE_2D, this->texture);
     // set the texture wrapping parameters
@@ -114,7 +136,7 @@ unsigned int Object::loadTexture() {
         std::cout << stbi_failure_reason() << std::endl;
     }
     stbi_image_free(textureImg);
-    return this->texture;
+    // return this->texture;
 }
 void Object::rotate(float angle, char axis) {
 	if (axis == 'x') {

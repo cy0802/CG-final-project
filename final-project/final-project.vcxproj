@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Background\Background.cpp" />
     <ClCompile Include="..\Includes\glad\glad.c" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\Object\Object.cpp" />
@@ -140,6 +141,7 @@
     <ClCompile Include="..\Shader\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Background\Background.h" />
     <ClInclude Include="..\Includes\glad\glad.h" />
     <ClInclude Include="..\Light\Light.h" />
     <ClInclude Include="..\Object\Object.h" />
@@ -147,6 +149,8 @@
     <ClInclude Include="..\Shader\Shader.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\resource\background.frag" />
+    <None Include="..\resource\background.vert" />
     <None Include="..\resource\landscape.frag" />
     <None Include="..\resource\landscape.vert" />
   </ItemGroup>

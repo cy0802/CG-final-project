@@ -27,15 +27,17 @@ public:
 	int sizeofData = 0;
 	unsigned int texture = -1;
 	char* texturePath;
+	unsigned int VAO, VBO;
 	
 	// float ambient = 0.1f;
 	
-	unsigned int loadTexture();
+	void loadTexture();
 	void readMtl(char* mtlPath);
 	Object(char* objfile, char* mtlfile, char* textureImg);
 	void init(char* objfile, char* mtlfile, char* textureImg);
 	void rotate(float angle, char axis);
 	void setup(Light light, glm::vec3 camera);
-	void adjust(glm::vec3 rotateAngle, glm::vec3 scalingFactor, glm::vec3 translation);
+	void adjust(glm::vec3 rotateAngle, glm::vec3 _scalingFactor, glm::vec3 translation);
 	void zoomin(float _scale);
+	void draw();
 };
