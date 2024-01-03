@@ -14,6 +14,7 @@ public:
 	void setMat4(char name[], glm::mat4 matrix);
 	void setVec3(char name[], glm::vec3);
 	void setInt(char name[], unsigned int x);
+	void setFloat(char name[], float x);
 private:
 	void errorChecking(unsigned int shaderID, std::string type);
 };

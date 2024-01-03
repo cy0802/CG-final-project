@@ -8,6 +8,11 @@ Object::Object(char* objfile, char* mtlfile, char* textureImg) {
     this->init(objfile, mtlfile, textureImg);
 }
 
+Object::~Object() {
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+}
+
 void Object::init(char* objfile, char* mtlfile, char* textureImg) {
     std::vector<float> v = ObjReader::read(objfile);
     float _scale = *(v.end() - 1);
@@ -21,11 +26,17 @@ void Object::init(char* objfile, char* mtlfile, char* textureImg) {
     this->sizeofData = v.size() / 8;
     std::copy(v.begin(), v.end(), this->data);
     rotation = rotationX = rotationY = rotationZ = glm::mat4(1.0f);
-    // readMtl(mtlfile);
+    readMtl(mtlfile);
     this->texturePath = textureImg;
 }
 
 void Object::readMtl(char* mtlPath) {
+    if (mtlPath == nullptr) {
+        ambient = glm::vec3(0.3, 0.3, 0.3);
+        diffuse = glm::vec3(1.0, 1.0, 1.0);
+        specular = glm::vec3(0.5, 0.5, 0.5);
+        return;
+    }
     // read mtl: material file
     std::ifstream mtlFile;
     mtlFile.open(mtlPath);
@@ -34,7 +45,8 @@ void Object::readMtl(char* mtlPath) {
         char buffer[500];
         strerror_s(buffer, 500, errno);
         std::cout << "Error: " << buffer;
-        exit(1);
+        
+        return;
     }
     else {
         std::cout << "open mtl file successfully\n";
@@ -50,7 +62,7 @@ void Object::readMtl(char* mtlPath) {
         else if (dataType.compare("Ks") == 0) {
             mtlFile >> specular.x >> specular.y >> specular.z;
         }
-        else if (dataType.compare("Ns") == 0) {
+        else if (dataType.compare("Ni") == 0) {
             mtlFile >> opticalDensity;
         }
         else {
@@ -59,6 +71,9 @@ void Object::readMtl(char* mtlPath) {
             // std::cout << buf << "\n";
         }
     }
+    std::cout << "Mtl Ambient: (" << ambient.x << ", " << ambient.y << ", " << ambient.z << ")\n";
+    std::cout << "Mtl Diffuse: (" << diffuse.x << ", " << diffuse.y << ", " << diffuse.z << ")\n";
+    std::cout << "Mtl Specular: (" << specular.x << ", " << specular.y << ", " << specular.z << ")\n";
 }
 
 void Object::adjust(glm::vec3 rotateAngle, glm::vec3 _scalingFactor, glm::vec3 translation) {
@@ -74,8 +89,14 @@ void Object::draw() {
     glBindVertexArray(VAO);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
+    if (useNormalMap) {
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, normalMapTexture);
+    }
     this->shader.use();
     this->shader.setInt((char*)"texture_", 0);
+    this->shader.setInt((char*)"useNormalMap", useNormalMap);
+    if(useNormalMap) this->shader.setInt((char*)"normalMap", 1);
     glDrawArrays(GL_TRIANGLES, 0, sizeofData);
 }
 
@@ -100,15 +121,16 @@ void Object::setup(Light light, glm::vec3 camera) {
 
     // this->shader.setVec3((char*)"objectColor", this->color);
     // this->shader.setMat4((char*)"local", this->rotation);
+    this->shader.setMat4((char*)"view", this->translation);
     this->shader.setMat4((char*)"local", this->rotation * this->scale);
-    // this->shader.setVec3((char*)"viewPos", camera);
+    this->shader.setVec3((char*)"viewPos", camera);
 
-    // this->shader.setVec3((char*)"light.position", light.position);
-    // this->shader.setVec3((char*)"light.color", light.color);
+    this->shader.setVec3((char*)"light.position", light.position);
+    this->shader.setVec3((char*)"light.color", light.color);
 
-    // this->shader.setVec3((char*)"material.ambient", this->ambient);
-    // this->shader.setVec3((char*)"material.diffuse", this->diffuse);
-    // this->shader.setVec3((char*)"material.specular", this->specular);
+    this->shader.setVec3((char*)"material.ambient", this->ambient);
+    this->shader.setVec3((char*)"material.diffuse", this->diffuse);
+    this->shader.setVec3((char*)"material.specular", this->specular);
 }
 void Object::loadTexture() {
     glGenTextures(1, &this->texture);
@@ -137,6 +159,33 @@ void Object::loadTexture() {
     }
     stbi_image_free(textureImg);
     // return this->texture;
+}
+void Object::loadNormalMap(char* normalMapPath) {
+    useNormalMap = true;
+    glGenTextures(1, &normalMapTexture);
+    glBindTexture(GL_TEXTURE_2D, normalMapTexture);
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load normal map image, create texture, and generate mipmaps
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true);
+    std::cout << "(loadNormalMap): " << normalMapPath << std::endl;
+    unsigned char* normalMapImg = stbi_load(normalMapPath, &width, &height, &nrChannels, 0);
+    if (normalMapImg) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, normalMapImg);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        std::cout << "successfully load normal map\nheight = " << height
+            << ", width = " << width << '\n';
+    }
+    else {
+        std::cout << "Failed to load normal map" << std::endl;
+        std::cout << stbi_failure_reason() << std::endl;
+    }
+    stbi_image_free(normalMapImg);
 }
 void Object::rotate(float angle, char axis) {
 	if (axis == 'x') {

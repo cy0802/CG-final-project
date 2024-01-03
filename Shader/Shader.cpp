@@ -54,7 +54,9 @@ Shader::Shader(char* verShaderPath, char* fragShaderPath) {
 void Shader::use() {
 	glUseProgram(id);
 }
-
+void Shader::setFloat(char name[], float x) {
+	glUniform1f(glGetUniformLocation(id, name), x);
+}
 void Shader::set4float(char name[], float x, float y, float z, float w) {
 	glUniform4f(glGetUniformLocation(id, name), x, y, z, w);
 }

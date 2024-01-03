@@ -142,6 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Background\Background.h" />
+    <ClInclude Include="..\Camera.h" />
     <ClInclude Include="..\Includes\glad\glad.h" />
     <ClInclude Include="..\Light\Light.h" />
     <ClInclude Include="..\Object\Object.h" />
@@ -153,6 +154,8 @@
     <None Include="..\resource\background.vert" />
     <None Include="..\resource\landscape.frag" />
     <None Include="..\resource\landscape.vert" />
+    <None Include="..\resource\sea.fs" />
+    <None Include="..\resource\sky.fs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

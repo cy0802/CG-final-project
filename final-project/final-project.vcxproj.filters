@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\main.cpp">
-      <Filter>來源檔案</Filter>
-    </ClCompile>
     <ClCompile Include="..\Includes\glad\glad.c">
       <Filter>來源檔案</Filter>
     </ClCompile>
@@ -31,6 +28,9 @@
       <Filter>來源檔案</Filter>
     </ClCompile>
     <ClCompile Include="..\Background\Background.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,6 +53,9 @@
     <ClInclude Include="..\Background\Background.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
+    <ClInclude Include="..\Camera.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\resource\landscape.frag">
@@ -65,6 +68,12 @@
       <Filter>來源檔案</Filter>
     </None>
     <None Include="..\resource\background.vert">
+      <Filter>來源檔案</Filter>
+    </None>
+    <None Include="..\resource\sky.fs">
+      <Filter>來源檔案</Filter>
+    </None>
+    <None Include="..\resource\sea.fs">
       <Filter>來源檔案</Filter>
     </None>
   </ItemGroup>
