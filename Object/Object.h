@@ -15,6 +15,7 @@ public:
 	glm::mat4 rotationX, rotationY, rotationZ, rotation;
 	glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 2.0f));
 	glm::mat4 translation = glm::mat4(1.0f);
+	glm::vec3 position;
 	glm::vec3 color = glm::vec3(0.827451, 0.788235, 0.705882);
 	glm::mat4 projection; // = glm::ortho(1.0, -1.0, 1.0, -1.0, -200.0, 200.0);
 	// glm::mat4 projection = glm::ortho(100.0, -100.0, 100.0, -100.0, -200.0, 200.0);
@@ -42,6 +43,7 @@ public:
 	void setup(Light light, glm::vec3 camera);
 	void adjust(glm::vec3 rotateAngle, glm::vec3 _scalingFactor, glm::vec3 translation);
 	void zoomin(float _scale);
+	void move(float dis, char direction);
 	void draw();
 	~Object();
 };

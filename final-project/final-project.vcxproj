@@ -154,6 +154,7 @@
     <None Include="..\resource\background.vert" />
     <None Include="..\resource\landscape.frag" />
     <None Include="..\resource\landscape.vert" />
+    <None Include="..\resource\mist.fs" />
     <None Include="..\resource\sea.fs" />
     <None Include="..\resource\sky.fs" />
   </ItemGroup>

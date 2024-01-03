@@ -14,7 +14,9 @@ Object::~Object() {
 }
 
 void Object::init(char* objfile, char* mtlfile, char* textureImg) {
+    std::cout << "Read Obj from " << objfile << "\n";
     std::vector<float> v = ObjReader::read(objfile);
+    std::cout << "---------------------------------------------------------\n";
     float _scale = *(v.end() - 1);
     if (*(v.end() - 2) > _scale) _scale = *(v.end() - 2);
     if (*(v.end() - 3) > _scale) _scale = *(v.end() - 3);
@@ -26,7 +28,9 @@ void Object::init(char* objfile, char* mtlfile, char* textureImg) {
     this->sizeofData = v.size() / 8;
     std::copy(v.begin(), v.end(), this->data);
     rotation = rotationX = rotationY = rotationZ = glm::mat4(1.0f);
+    std::cout << "Read Mtl from " << mtlfile << "\n";
     readMtl(mtlfile);
+    std::cout << "---------------------------------------------------------\n";
     this->texturePath = textureImg;
 }
 
@@ -82,7 +86,8 @@ void Object::adjust(glm::vec3 rotateAngle, glm::vec3 _scalingFactor, glm::vec3 t
     rotate(rotateAngle.z, 'z');
     this->scale = glm::scale(this->scale, _scalingFactor);
     this->scalingFactor = this->scalingFactor * _scalingFactor;
-    this->translation = glm::translate(glm::mat4(1.0f), translation);
+    position = translation;
+    this->translation = glm::translate(glm::mat4(1.0f), position);
 }
 
 void Object::draw() {
@@ -95,6 +100,7 @@ void Object::draw() {
     }
     this->shader.use();
     this->shader.setInt((char*)"texture_", 0);
+    this->shader.setMat4((char*)"local", rotation * scale);
     this->shader.setInt((char*)"useNormalMap", useNormalMap);
     if(useNormalMap) this->shader.setInt((char*)"normalMap", 1);
     glDrawArrays(GL_TRIANGLES, 0, sizeofData);
@@ -204,4 +210,16 @@ void Object::zoomin(float _scale) {
     float rate = (scalingFactor.x + _scale) / scalingFactor.x;
     scalingFactor = glm::vec3(scalingFactor.x + _scale, rate * scalingFactor.y, rate * scalingFactor.z);
     this->scale = glm::scale(glm::mat4(1.0f), this->scalingFactor);
+}
+void Object::move(float dis, char direction) {
+    if (direction == 'x') {
+        position.x += dis;
+    }
+    else if (direction == 'y') {
+        position.y += dis;
+    }
+    else if (direction == 'z') {
+        position.z += dis;
+    }
+    translation = glm::translate(glm::mat4(1.0), position);
 }
